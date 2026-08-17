@@ -1,0 +1,61 @@
+version: 2
+
+sources:
+  - name: bronze
+    schema: bronze
+    description: Raw bronze layer containing unparsed CSV data
+    tables:
+      - name: raw_sales_records
+        description: |
+          Raw sales records staging table storing unparsed CSV rows.
+          Each row contains audit columns and the complete CSV line for reprocessing.
+        columns:
+          - name: _source_file
+            description: Source filename this record came from
+          - name: _ingested_at
+            description: Timestamp when this record was ingested
+          - name: _row_number
+            description: Row number within the source file
+          - name: raw_line
+            description: Complete unparsed CSV line for audit trail
+
+models:
+  - name: stg_bronze_sales
+    description: |
+      Staging model that parses raw CSV lines from bronze.raw_sales_records
+      into individual columns using split_part.
+      
+      No filtering or transformation is applied at this stage.
+      Raw column values are exposed as-is with audit columns (_source_file, _ingested_at)
+      for downstream Silver layer transformations to consume.
+    
+    materialized: view
+    columns:
+      - name: _source_file
+        description: Source filename (propagated from bronze)
+      - name: _ingested_at
+        description: Ingestion timestamp (propagated from bronze)
+      - name: _row_number
+        description: Row number within source file
+      - name: raw_line
+        description: Complete unparsed CSV row for audit trail
+      - name: region_raw
+        description: Region code (unparsed, raw)
+      - name: country_raw
+        description: Country code (unparsed, raw)
+      - name: item_type_raw
+        description: Item type code (unparsed, raw)
+      - name: sales_channel_raw
+        description: Sales channel code (unparsed, raw)
+      - name: order_date_raw
+        description: Order date as text (unparsed, raw, format MM/DD/YYYY)
+      - name: order_id_raw
+        description: Order ID as text (unparsed, raw)
+      - name: ship_date_raw
+        description: Ship date as text (unparsed, raw, format MM/DD/YYYY)
+      - name: units_sold_raw
+        description: Units sold as text (unparsed, raw)
+      - name: unit_price_raw
+        description: Unit price as text (unparsed, raw)
+      - name: unit_cost_raw
+        description: Unit cost as text (unparsed, raw)

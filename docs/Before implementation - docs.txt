@@ -1,0 +1,17 @@
+
+6 DOCUMENTS FOR ANY IDEA BEFORE IMLPEMENTATIONS:
+
+1. PRD : PRODUCT REQURIMENT DOCUMENT (mentions what are you building
+
+2. TRD: Technical Requriment document (entire tech blueprint) 
+
+3. APP/PRODUCT FLOW : THE FEATURES AND ENTIRE NAVIGATION
+
+4. UI/UX BRIEF: all prespectives aesthetics 
+
+5. Backend Schema : entire backend mateirals
+
+6. Implementation plan
+
+
+

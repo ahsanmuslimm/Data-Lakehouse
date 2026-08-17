@@ -1,0 +1,68 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Public\\ETL_Assignment_01\\AdventureWorkOLAP\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{2BAA1C0A-9F31-7F68-73F1-E091D9E2B657}|AdventureWorkOLAP.dwproj|C:\\Users\\Public\\ETL_Assignment_01\\AdventureWorkOLAP\\Dim Date.dim||{B4191D15-2D32-45F2-906F-E91BBAAA6059}|Design",
+      "RelativeMoniker": "D:0:0:{2BAA1C0A-9F31-7F68-73F1-E091D9E2B657}|AdventureWorkOLAP.dwproj|solutionrelative:Dim Date.dim||{B4191D15-2D32-45F2-906F-E91BBAAA6059}|Design"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2BAA1C0A-9F31-7F68-73F1-E091D9E2B657}|AdventureWorkOLAP.dwproj|C:\\Users\\Public\\ETL_Assignment_01\\AdventureWorkOLAP\\Fact Internet Sales.dim||{B4191D15-2D32-45F2-906F-E91BBAAA6059}|Design",
+      "RelativeMoniker": "D:0:0:{2BAA1C0A-9F31-7F68-73F1-E091D9E2B657}|AdventureWorkOLAP.dwproj|solutionrelative:Fact Internet Sales.dim||{B4191D15-2D32-45F2-906F-E91BBAAA6059}|Design"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2BAA1C0A-9F31-7F68-73F1-E091D9E2B657}|AdventureWorkOLAP.dwproj|C:\\Users\\Public\\ETL_Assignment_01\\AdventureWorkOLAP\\Dim Customer.dim||{B4191D15-2D32-45F2-906F-E91BBAAA6059}|Design",
+      "RelativeMoniker": "D:0:0:{2BAA1C0A-9F31-7F68-73F1-E091D9E2B657}|AdventureWorkOLAP.dwproj|solutionrelative:Dim Customer.dim||{B4191D15-2D32-45F2-906F-E91BBAAA6059}|Design"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Dim Date.dim [Design]",
+              "DocumentMoniker": "C:\\Users\\Public\\ETL_Assignment_01\\AdventureWorkOLAP\\Dim Date.dim",
+              "RelativeDocumentMoniker": "Dim Date.dim",
+              "ToolTip": "C:\\Users\\Public\\ETL_Assignment_01\\AdventureWorkOLAP\\Dim Date.dim [Design]",
+              "RelativeToolTip": "Dim Date.dim [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-06-18T04:57:09.042Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Fact Internet Sales.dim [Design]",
+              "DocumentMoniker": "C:\\Users\\Public\\ETL_Assignment_01\\AdventureWorkOLAP\\Fact Internet Sales.dim",
+              "RelativeDocumentMoniker": "Fact Internet Sales.dim",
+              "ToolTip": "C:\\Users\\Public\\ETL_Assignment_01\\AdventureWorkOLAP\\Fact Internet Sales.dim [Design]",
+              "RelativeToolTip": "Fact Internet Sales.dim [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-06-18T04:55:58.79Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Dim Customer.dim [Design]",
+              "DocumentMoniker": "C:\\Users\\Public\\ETL_Assignment_01\\AdventureWorkOLAP\\Dim Customer.dim",
+              "RelativeDocumentMoniker": "Dim Customer.dim",
+              "ToolTip": "C:\\Users\\Public\\ETL_Assignment_01\\AdventureWorkOLAP\\Dim Customer.dim [Design]",
+              "RelativeToolTip": "Dim Customer.dim [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-06-18T04:54:50.648Z",
+              "EditorCaption": " [Design]"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

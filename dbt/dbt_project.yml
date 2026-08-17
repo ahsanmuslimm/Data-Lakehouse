@@ -1,0 +1,50 @@
+
+# Name your project! Project names should be lowercase and use underscores as separators
+# See documentation: https://docs.getdbt.com/docs/get-started/project-setup
+
+name: 'retail_sales'
+version: '1.0.0'
+config-version: 2
+
+# This setting configures which "profile" dbt uses for this project.
+profile: 'retail_sales'
+
+# These configurations specify where dbt should look for different types of files.
+# The `source-paths` config, for example, leaves you free to change your Python quoting logic
+# without changing any filepaths called by any statements dbt runs against your data.
+# You may configure these path as absolute or relative to the `dbt_project.yml` file.
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+data-paths: ["data"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+target-path: "target"  # directory which will store compiled SQL files
+clean-targets:         # directories to be cleaned by `dbt clean`
+  - "target"
+  - "dbt_packages"
+
+# Configuring models
+# Full documentation: https://docs.getdbt.com/docs/configuring-models
+
+models:
+  retail_sales:
+    # Config indicated by + and applies to all files under models/example/
+    staging:
+      materialized: view
+    silver:
+      materialized: incremental
+      unique_key: order_id
+      on_schema_change: fail
+    gold:
+      materialized: table
+
+seeds:
+  retail_sales:
+    quote_csv: true
+    schema: public
+
+vars:
+  # Declare variables that can be used across dbt project
+  watermark_source: 'sales'

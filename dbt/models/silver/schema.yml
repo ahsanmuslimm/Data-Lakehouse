@@ -1,0 +1,124 @@
+version: 2
+
+sources:
+  - name: silver
+    schema: silver
+    description: Silver layer containing cleaned and validated data
+    tables:
+      - name: rejection_log
+        description: |
+          Log of rejected records that failed validation in the Silver layer.
+          Contains raw data and rejection reason for audit trail.
+        columns:
+          - name: id
+            description: Unique identifier for rejection log entry
+          - name: source_file
+            description: Source file where the rejected record originated
+          - name: row_number
+            description: Row number within the source file
+          - name: raw_data
+            description: Complete raw data from the rejected row
+          - name: rejection_reason
+            description: Reason why the record was rejected
+          - name: rejected_at
+            description: Timestamp when the record was rejected
+
+models:
+  - name: silver_sales_records
+    description: |
+      Cleaned, typed, and validated sales records from the Bronze layer.
+      
+      Transformations:
+      - Type casting to proper DATE, INTEGER, and NUMERIC types
+      - Whitespace trimming on all TEXT columns
+      - Validation of required fields (order_id, order_date, units_sold)
+      - Rejection of invalid or NULL records to rejection_log
+      - Deduplication on order_id (most recent by _ingested_at)
+      - Incremental filtering on order_date > watermark_ts
+      
+      Invalid records are routed to silver.rejection_log for audit trail.
+    
+    materialized: incremental
+    unique_key: order_id
+    on_schema_change: fail
+    
+    columns:
+      - name: order_id
+        description: Unique order identifier (primary key)
+        data_tests:
+          - unique
+          - not_null
+      
+      - name: order_date
+        description: Date the order was placed (required, DATE type)
+        data_tests:
+          - not_null
+      
+      - name: ship_date
+        description: Date the order was shipped (nullable, DATE type)
+      
+      - name: country_raw
+        description: Country code (raw text, from dimension master data)
+      
+      - name: region_raw
+        description: Region code (raw text, from dimension master data)
+      
+      - name: item_type_raw
+        description: Product item type (raw text, from dimension master data)
+      
+      - name: sales_channel
+        description: Sales channel (raw text, from dimension master data)
+      
+      - name: units_sold
+        description: Number of units sold (required, INTEGER, must be > 0)
+        data_tests:
+          - not_null
+          - numeric_range:
+              min_value: 1
+              max_value: 10000
+      
+      - name: unit_price
+        description: Unit price per item (NUMERIC(10,2), must be >= 0)
+        data_tests:
+          - not_null
+      
+      - name: unit_cost
+        description: Unit cost per item (NUMERIC(10,2), must be >= 0)
+        data_tests:
+          - not_null
+      
+      - name: _source_file
+        description: Source filename (audit column)
+      
+      - name: _loaded_at
+        description: Timestamp when the record was loaded into Silver layer
+
+  - name: silver_rejection_log
+    description: |
+      Audit log of records rejected during Silver layer validation.
+      
+      Captures records that fail validation due to:
+      - NULL or empty order_id
+      - Invalid or unparseable order_date
+      - NULL, invalid, or non-positive units_sold
+      - Other type conversion failures
+      
+      Enables root cause analysis and data quality monitoring.
+    
+    materialized: table
+    
+    columns:
+      - name: source_file
+        description: Source file where the rejected record originated
+      
+      - name: row_number
+        description: Row number within the source file
+      
+      - name: raw_data
+        description: Complete raw CSV line of the rejected record
+      
+      - name: rejection_reason
+        description: Descriptive reason for rejection
+      
+      - name: rejected_at
+        description: Timestamp when rejection was recorded

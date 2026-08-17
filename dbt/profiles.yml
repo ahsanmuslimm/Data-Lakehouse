@@ -1,0 +1,35 @@
+retail_sales:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('DBT_PG_HOST', 'localhost') }}"
+      port: "{{ env_var('DBT_PG_PORT', 5432) | as_number }}"
+      user: "{{ env_var('DBT_PG_USER', 'postgres') }}"
+      password: "{{ env_var('DBT_PG_PASSWORD', 'postgres') }}"
+      dbname: "{{ env_var('DBT_PG_DBNAME', 'retail_sales') }}"
+      schema: public
+      threads: 4
+      keepalives_idle: 0
+
+    ci:
+      type: postgres
+      host: "{{ env_var('DBT_PG_HOST', 'postgres') }}"
+      port: "{{ env_var('DBT_PG_PORT', 5432) | as_number }}"
+      user: "{{ env_var('DBT_PG_USER', 'postgres') }}"
+      password: "{{ env_var('DBT_PG_PASSWORD', 'postgres') }}"
+      dbname: "{{ env_var('DBT_PG_DBNAME', 'retail_sales') }}"
+      schema: public
+      threads: 2
+      keepalives_idle: 0
+
+    prod:
+      type: postgres
+      host: "{{ env_var('DBT_PG_HOST_PROD', 'localhost') }}"
+      port: "{{ env_var('DBT_PG_PORT_PROD', 5432) | as_number }}"
+      user: "{{ env_var('DBT_PG_USER_PROD', 'postgres') }}"
+      password: "{{ env_var('DBT_PG_PASSWORD_PROD', 'postgres') }}"
+      dbname: "{{ env_var('DBT_PG_DBNAME_PROD', 'retail_sales_prod') }}"
+      schema: public
+      threads: 8
+      keepalives_idle: 0

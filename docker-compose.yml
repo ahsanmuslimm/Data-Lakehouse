@@ -1,0 +1,274 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Retail Sales Lakehouse Migration — Docker Compose Development Stack
+# Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 8.10
+# ─────────────────────────────────────────────────────────────────────────────
+
+version: '3.8'
+
+services:
+  # ── PostgreSQL 15 Warehouse ─────────────────────────────────────────────────
+  postgres:
+    image: postgres:15
+    container_name: retail-lakehouse-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - lakehouse-network
+    restart: unless-stopped
+
+  # ── MinIO Object Storage ────────────────────────────────────────────────────
+  minio:
+    image: minio/minio:latest
+    container_name: retail-lakehouse-minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    networks:
+      - lakehouse-network
+    restart: unless-stopped
+
+  # ── Airflow Initialization (One-shot DB Setup) ──────────────────────────────
+  airflow-init:
+    image: apache/airflow:2.9.0-python3.11
+    container_name: retail-lakehouse-airflow-init
+    environment:
+      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW__CORE__EXECUTOR}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW__DATABASE__SQL_ALCHEMY_CONN}
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW__WEBSERVER__SECRET_KEY}
+      _AIRFLOW_DB_MIGRATE: 'true'
+      _AIRFLOW_WWW_USER_CREATE: 'true'
+      _AIRFLOW_WWW_USER_USERNAME: ${POSTGRES_USER}
+      _AIRFLOW_WWW_USER_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./dbt:/opt/airflow/dbt
+      - ./airflow/plugins:/opt/airflow/plugins
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - lakehouse-network
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        airflow db migrate
+        airflow users create \
+          --username $${_AIRFLOW_WWW_USER_USERNAME} \
+          --password $${_AIRFLOW_WWW_USER_PASSWORD} \
+          --firstname Admin \
+          --lastname User \
+          --role Admin \
+          --email admin@example.com || true
+        echo "Airflow initialization complete"
+
+  # ── Airflow Webserver ───────────────────────────────────────────────────────
+  airflow-webserver:
+    image: apache/airflow:2.9.0-python3.11
+    container_name: retail-lakehouse-airflow-webserver
+    environment:
+      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW__CORE__EXECUTOR}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW__DATABASE__SQL_ALCHEMY_CONN}
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW__WEBSERVER__SECRET_KEY}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_SOURCE_BUCKET: ${MINIO_SOURCE_BUCKET}
+      MINIO_BRONZE_BUCKET: ${MINIO_BRONZE_BUCKET}
+      ALERT_WEBHOOK_URL: ${ALERT_WEBHOOK_URL}
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./dbt:/opt/airflow/dbt
+      - ./airflow/plugins:/opt/airflow/plugins
+    depends_on:
+      postgres:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+    networks:
+      - lakehouse-network
+    restart: unless-stopped
+    command: webserver
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # ── Airflow Scheduler ───────────────────────────────────────────────────────
+  airflow-scheduler:
+    image: apache/airflow:2.9.0-python3.11
+    container_name: retail-lakehouse-airflow-scheduler
+    environment:
+      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW__CORE__EXECUTOR}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW__DATABASE__SQL_ALCHEMY_CONN}
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW__WEBSERVER__SECRET_KEY}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_SOURCE_BUCKET: ${MINIO_SOURCE_BUCKET}
+      MINIO_BRONZE_BUCKET: ${MINIO_BRONZE_BUCKET}
+      ALERT_WEBHOOK_URL: ${ALERT_WEBHOOK_URL}
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./dbt:/opt/airflow/dbt
+      - ./airflow/plugins:/opt/airflow/plugins
+    depends_on:
+      postgres:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+    networks:
+      - lakehouse-network
+    restart: unless-stopped
+    command: scheduler
+    healthcheck:
+      test: ["CMD", "airflow", "jobs", "check", "--job-type", "SchedulerJob"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # ── Airflow Worker (LocalExecutor) ──────────────────────────────────────────
+  airflow-worker:
+    image: apache/airflow:2.9.0-python3.11
+    container_name: retail-lakehouse-airflow-worker
+    environment:
+      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW__CORE__EXECUTOR}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW__DATABASE__SQL_ALCHEMY_CONN}
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW__WEBSERVER__SECRET_KEY}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_SOURCE_BUCKET: ${MINIO_SOURCE_BUCKET}
+      MINIO_BRONZE_BUCKET: ${MINIO_BRONZE_BUCKET}
+      ALERT_WEBHOOK_URL: ${ALERT_WEBHOOK_URL}
+      DBT_TARGET: ${DBT_TARGET}
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./dbt:/opt/airflow/dbt
+      - ./airflow/plugins:/opt/airflow/plugins
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+    networks:
+      - lakehouse-network
+    restart: unless-stopped
+    command: triggerer
+
+  # ── Schema Initialization (One-shot DDL + Seed Load) ────────────────────────
+  schema-init:
+    image: python:3.11-slim
+    container_name: retail-lakehouse-schema-init
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./scripts:/scripts
+      - ./dbt/seeds:/seeds
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - lakehouse-network
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        echo "Installing PostgreSQL client..."
+        apt-get update && apt-get install -y postgresql-client
+        /scripts/init_container.sh
+
+  # ── Metabase BI Dashboard ───────────────────────────────────────────────────
+  metabase:
+    image: metabase/metabase:latest
+    container_name: retail-lakehouse-metabase
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_DBNAME: ${POSTGRES_DB}
+      MB_DB_PORT: 5432
+      MB_DB_USER: ${POSTGRES_USER}
+      MB_DB_PASS: ${POSTGRES_PASSWORD}
+      MB_DB_HOST: postgres
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      schema-init:
+        condition: service_completed_successfully
+    networks:
+      - lakehouse-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+
+# ── Named Volumes ──────────────────────────────────────────────────────────────
+volumes:
+  postgres_data:
+    name: retail-lakehouse-postgres-data
+  minio_data:
+    name: retail-lakehouse-minio-data
+
+# ── Network ────────────────────────────────────────────────────────────────────
+networks:
+  lakehouse-network:
+    name: retail-lakehouse-network
+    driver: bridge

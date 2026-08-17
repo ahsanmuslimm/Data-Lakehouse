@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35931.197 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D2ABAB84-BF74-430A-B69E-9DC6D40DDA17}") = "AdventureWorkOLAP", "AdventureWorkOLAP.dwproj", "{2BAA1C0A-9F31-7F68-73F1-E091D9E2B657}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Development|Default = Development|Default
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2BAA1C0A-9F31-7F68-73F1-E091D9E2B657}.Development|Default.ActiveCfg = Development
+		{2BAA1C0A-9F31-7F68-73F1-E091D9E2B657}.Development|Default.Build.0 = Development
+		{2BAA1C0A-9F31-7F68-73F1-E091D9E2B657}.Development|Default.Deploy.0 = Development
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {008DDE51-0B98-42B7-B799-1100139D8C70}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,70 @@
+SELECT 
+  [Order Date].[Calendar Year].[Calendar Year].Members ON ROWS,
+  [Measures].[Sales Amount] ON COLUMNS
+FROM [Adventure Works DW2019];
+
+	SELECT 
+	  NON EMPTY [Order Date].[Calendar Year].[Calendar Year].Members ON ROWS,
+	  [Measures].[Sales Amount] ON COLUMNS
+	FROM [Adventure Works DW2019];
+
+
+
+	SELECT 
+	  TopCount(
+		[Dim Product].[Spanish Product Name].Members, 
+		7, 
+		[Measures].[Sales Amount]
+	  ) ON ROWS,
+	  [Measures].[Sales Amount] ON COLUMNS
+	FROM [Adventure Works DW2019];
+
+
+	SELECT 
+	  ORDER([Dim Product].[French Product Name].Members, [Measures].[Sales Amount], DESC) ON ROWS,
+	  [Measures].[Sales Amount] ON COLUMNS
+	FROM [Adventure Works DW2019];
+
+
+	SELECT 
+	  FILTER(
+	   [Dim Customer].[First Name].Members,
+		[Measures].[Sales Amount] > 130000
+	  ) ON ROWS,
+	  [Measures].[Sales Amount] ON COLUMNS
+	FROM [Adventure Works DW2019];
+
+
+	SELECT NON EMPTY
+	  CROSSJOIN(
+		[Order Date].[Calendar Year].[Calendar Year].Members,
+	  [Dim Product].[English Product Name].Members
+	  ) ON ROWS,
+	  [Measures].[Sales Amount] ON COLUMNS
+	FROM [Adventure Works DW2019];
+
+
+
+	WITH MEMBER [Measures].[Profit Margin (%)] AS 
+	  (([Measures].[Sales Amount] - [Measures].[Total Product Cost]) / [Measures].[Sales Amount]) * 100
+
+	SELECT NON EMPTY
+	  [Order Date].[Calendar Year].[Calendar Year].Members ON ROWS,
+	  {[Measures].[Sales Amount], [Measures].[Profit Margin (%)]} ON COLUMNS
+	FROM [Adventure Works DW2019];
+
+
+	SELECT 
+  EXISTS(
+   [Dim Customer].[Email Address].Members,
+   [Dim Sales Territory].[Sales Territory Country].&[United States]
+  ) ON ROWS,
+  [Measures].[Sales Amount] ON COLUMNS
+FROM [Adventure Works DW2019];
+
+
+SELECT  
+  [Order Date].[Calendar Quarter].&[1].Children ON ROWS,
+  [Measures].[Sales Amount] ON COLUMNS
+FROM [Adventure Works DW2019];
+
