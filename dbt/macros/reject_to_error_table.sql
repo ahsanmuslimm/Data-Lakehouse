@@ -16,14 +16,23 @@
 -- ============================================================================
 
 {% macro reject_to_error_table(source_file, row_number, raw_data, rejection_reason) %}
-  INSERT INTO {{ source('silver', 'rejection_log') }}
-    (source_file, row_number, raw_data, rejection_reason)
-  SELECT
-    '{{ source_file }}'::TEXT as source_file,
-    {{ row_number }}::BIGINT as row_number,
-    '{{ raw_data }}'::TEXT as raw_data,
-    '{{ rejection_reason }}'::TEXT as rejection_reason
-  {% if not execute %}
-    WHERE FALSE  -- during parsing, don't execute
-  {% endif %}
+    {% set insert_sql %}
+        INSERT INTO silver.rejection_log (
+            source_file,
+            row_number,
+            raw_data,
+            rejection_reason,
+            rejected_at
+        ) VALUES (
+            '{{ source_file }}',
+            {{ row_number }},
+            '{{ raw_data | replace("'", "''") }}',
+            '{{ rejection_reason }}',
+            now()
+        );
+    {% endset %}
+    
+    {% if execute %}
+        {% do run_query(insert_sql) %}
+    {% endif %}
 {% endmacro %}

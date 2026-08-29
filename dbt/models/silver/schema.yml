@@ -38,39 +38,56 @@ models:
       
       Invalid records are routed to silver.rejection_log for audit trail.
     
-    materialized: incremental
-    unique_key: order_id
-    on_schema_change: fail
+    config:
+      contract:
+        enforced: true
+      materialized: incremental
+      unique_key: order_id
+      on_schema_change: fail
     
     columns:
       - name: order_id
         description: Unique order identifier (primary key)
+        data_type: text
+        constraints:
+          - type: not_null
         data_tests:
           - unique
           - not_null
       
       - name: order_date
         description: Date the order was placed (required, DATE type)
+        data_type: date
+        constraints:
+          - type: not_null
         data_tests:
           - not_null
       
       - name: ship_date
         description: Date the order was shipped (nullable, DATE type)
+        data_type: date
       
       - name: country_raw
         description: Country code (raw text, from dimension master data)
+        data_type: text
       
       - name: region_raw
         description: Region code (raw text, from dimension master data)
+        data_type: text
       
       - name: item_type_raw
         description: Product item type (raw text, from dimension master data)
+        data_type: text
       
       - name: sales_channel
         description: Sales channel (raw text, from dimension master data)
+        data_type: text
       
       - name: units_sold
         description: Number of units sold (required, INTEGER, must be > 0)
+        data_type: integer
+        constraints:
+          - type: not_null
         data_tests:
           - not_null
           - numeric_range:
@@ -78,20 +95,28 @@ models:
               max_value: 10000
       
       - name: unit_price
-        description: Unit price per item (NUMERIC(10,2), must be >= 0)
+        description: Unit price per item (NUMERIC, must be >= 0)
+        data_type: numeric
+        constraints:
+          - type: not_null
         data_tests:
           - not_null
       
       - name: unit_cost
-        description: Unit cost per item (NUMERIC(10,2), must be >= 0)
+        description: Unit cost per item (NUMERIC, must be >= 0)
+        data_type: numeric
+        constraints:
+          - type: not_null
         data_tests:
           - not_null
       
       - name: _source_file
         description: Source filename (audit column)
+        data_type: text
       
       - name: _loaded_at
         description: Timestamp when the record was loaded into Silver layer
+        data_type: timestamptz
 
   - name: silver_rejection_log
     description: |
@@ -105,7 +130,8 @@ models:
       
       Enables root cause analysis and data quality monitoring.
     
-    materialized: table
+    config:
+      materialized: table
     
     columns:
       - name: source_file
