@@ -185,7 +185,7 @@ so every step produces executable, integrated code — nothing is left orphaned.
     - Handle the `-1` / `Unknown` case by never hashing a NULL — coerce to `'Unknown'` before hashing
     - _Requirements: 4.4–4.9_
 
-  - [~] 8.2 Write six dimension models (`dbt/models/gold/dim_*.sql`)
+  - [x] 8.2 Write six dimension models (`dbt/models/gold/dim_*.sql`)
     - One model per dimension: `dim_country.sql`, `dim_region.sql`, `dim_branch.sql`, `dim_product.sql`, `dim_category.sql`, `dim_channel.sql`
     - Each model: SELECT from the corresponding seed (via `ref()`), generate surrogate key using the macro, include the `Unknown` sentinel row (natural key = `'Unknown'`, surrogate key = `-1`)
     - Materialize as `table` with `dbt_project.yml` config

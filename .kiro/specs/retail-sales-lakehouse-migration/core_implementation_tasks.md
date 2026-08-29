@@ -33,7 +33,7 @@ This document outlines only the core implementation tasks necessary to build the
 
 - [ ] 8. Gold dbt models
   - [x] 8.1 Write `dbt/macros/generate_surrogate_key.sql`
-  - [ ] 8.2 Write six dimension models (`dbt/models/gold/dim_*.sql`)
+  - [x] 8.2 Write six dimension models (`dbt/models/gold/dim_*.sql`)
   - [ ] 8.3 Write `dbt/models/gold/fact_sales.sql`
   - [ ] 8.4 Add dbt model contracts to Gold YAML configs (`dbt/models/gold/schema.yml`)
 
