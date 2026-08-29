@@ -1,0 +1,144 @@
+version: 2
+
+models:
+  - name: dim_country
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: country_key
+        data_type: text
+        constraints:
+          - type: not_null
+      - name: c_id
+        data_type: text
+      - name: country_name
+        data_type: text
+        constraints:
+          - type: not_null
+
+  - name: dim_region
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: region_key
+        data_type: text
+        constraints:
+          - type: not_null
+      - name: region_id
+        data_type: text
+      - name: region_name
+        data_type: text
+
+  - name: dim_branch
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: branch_key
+        data_type: text
+        constraints:
+          - type: not_null
+      - name: b_id
+        data_type: text
+      - name: b_name
+        data_type: text
+
+  - name: dim_product
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: product_key
+        data_type: text
+        constraints:
+          - type: not_null
+      - name: item_type
+        data_type: text
+        constraints:
+          - type: not_null
+
+  - name: dim_category
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: category_key
+        data_type: text
+        constraints:
+          - type: not_null
+      - name: c_id
+        data_type: text
+      - name: c_name
+        data_type: text
+        constraints:
+          - type: not_null
+
+  - name: dim_channel
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: channel_key
+        data_type: text
+        constraints:
+          - type: not_null
+      - name: sales_channel
+        data_type: text
+        constraints:
+          - type: not_null
+
+  - name: fact_sales
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: order_id
+        data_type: text
+        constraints:
+          - type: not_null
+      - name: order_date
+        data_type: date
+        constraints:
+          - type: not_null
+      - name: ship_date
+        data_type: date
+      - name: country_key
+        data_type: text
+        constraints:
+          - type: not_null
+      - name: region_key
+        data_type: text
+        constraints:
+          - type: not_null
+      - name: branch_key
+        data_type: text
+        constraints:
+          - type: not_null
+      - name: product_key
+        data_type: text
+        constraints:
+          - type: not_null
+      - name: category_key
+        data_type: text
+        constraints:
+          - type: not_null
+      - name: channel_key
+        data_type: text
+        constraints:
+          - type: not_null
+      - name: units_sold
+        data_type: integer
+        constraints:
+          - type: not_null
+      - name: unit_price
+        data_type: numeric
+        constraints:
+          - type: not_null
+      - name: unit_cost
+        data_type: numeric
+        constraints:
+          - type: not_null
+      - name: _loaded_at
+        data_type: timestamptz
