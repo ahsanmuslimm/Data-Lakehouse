@@ -41,5 +41,7 @@ SELECT
   split_part(raw_line, ',', 7)::TEXT AS ship_date_raw,
   split_part(raw_line, ',', 8)::TEXT AS units_sold_raw,
   split_part(raw_line, ',', 9)::TEXT AS unit_price_raw,
-  split_part(raw_line, ',', 10)::TEXT AS unit_cost_raw
+  split_part(raw_line, ',', 10)::TEXT AS unit_cost_raw,
+  split_part(raw_line, ',', 11)::TEXT AS branch_raw,
+  split_part(raw_line, ',', 12)::TEXT AS category_raw
 FROM source_data

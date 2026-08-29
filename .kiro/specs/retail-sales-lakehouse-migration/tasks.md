@@ -191,7 +191,7 @@ so every step produces executable, integrated code — nothing is left orphaned.
     - Materialize as `table` with `dbt_project.yml` config
     - _Requirements: 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 4.11_
 
-  - [~] 8.3 Write `dbt/models/gold/fact_sales.sql`
+  - [x] 8.3 Write `dbt/models/gold/fact_sales.sql`
     - JOIN `silver.sales_records` to each dimension using natural keys; resolve surrogate keys; fall back to `-1` for any unmatched natural key using `COALESCE(dim.surrogate_key, -1)`
     - Compute no derived columns (total_revenue and total_cost are `GENERATED ALWAYS AS ... STORED` in DDL)
     - Materialize as `table`; include all FK columns and measure columns
